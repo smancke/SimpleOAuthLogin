@@ -1,5 +1,7 @@
 <?php
 
+require 'SimpleHttp.php';
+
 class SimpleGoogleLogin {
 
     private $URLS = array(
@@ -20,11 +22,14 @@ class SimpleGoogleLogin {
      * Init the API
      * $config should have the keys: client_id, client_secret, redirect_uri
      */
-    public function __construct($config, $httpClient) {
+    public function __construct($config, $httpClient=null) {
         if (! function_exists('curl_init')) {
             throw new Exception('SimpleGoogleLogin requires the CURL PHP extension');
         }
         $this->config = $config;
+        if ($httpClient == null) {
+            $httpClient = new SimpleHttp();
+        }
         $this->http = $httpClient;
     }
 
@@ -54,8 +59,9 @@ class SimpleGoogleLogin {
                       "client_secret" => $this->config['client_secret']
                       ];
         $authCodeResultJson = $this->http->postRequest($this->URLS['token'], $post_data);
-        $this->authCodeResult = json_decode($authCodeResultJson);
-        return $this->authCodeResult;
+
+        $this->authCodeResult = json_decode($authCodeResultJson->body);
+        return ($authCodeResultJson->code == 200);
     }
 
     /**
@@ -66,7 +72,7 @@ class SimpleGoogleLogin {
         $tokenInfoParams = ['id_token' => $this->authCodeResult->id_token];
 
         $tokenInfoResultJson = $this->http->getRequest($this->URLS['tokenInfo'], $tokenInfoParams, $header);
-        $this->tokenInfoResult = json_decode($tokenInfoResultJson);
+        $this->tokenInfoResult = json_decode($tokenInfoResultJson->body);
         return $this->tokenInfoResult;
     }
 }

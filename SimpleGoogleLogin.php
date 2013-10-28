@@ -83,10 +83,13 @@ class SimpleGoogleLogin {
     /**
      * fetches all the people, I know
      */
-    public function getMePeople() {
+    public function getMePeople($nextPageToken=null) {
         $header = ['authorization: Bearer '. $this->authCodeResult->access_token];
 
-        $tokenInfoResultJson = $this->http->getRequest($this->URLS['mePeople'], [], $header);
+        $params = [];
+        if ($nextPageToken)
+            $params['pageToken'] = $nextPageToken;
+        $tokenInfoResultJson = $this->http->getRequest($this->URLS['mePeople'], $params, $header);
         return json_decode($tokenInfoResultJson->body);
     }
 

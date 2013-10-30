@@ -38,14 +38,16 @@ class SimpleGoogleLogin {
     /**
      * Returns the login url for google.
      * (The url to forward to)
+     * $state: any random value to verify after login
      */
-    public function getAuthUrl($plusScope=false) {
+    public function getAuthUrl($state, $plusScope=false) {
         $authParams = ['response_type' => 'code',
                        'redirect_uri' => $this->config['redirect_uri'],
                        'client_id' => $this->config['client_id'],
                        'scope' => 'https://www.googleapis.com/auth/userinfo.email',
                        'access_type' => 'offline',
-                       'approval_prompt' => 'force'];
+                       'approval_prompt' => 'force',
+                       'state' => $state];
 
         if ($plusScope)
             $authParams['scope'] .= ' https://www.googleapis.com/auth/plus.login';

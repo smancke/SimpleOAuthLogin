@@ -2,7 +2,7 @@
 
 require 'SimpleHttp.php';
 
-class SimpleGoogleLogin {
+class GoogleLoginProvider {
 
     private $URLS = array(
                           'token' => 'https://accounts.google.com/o/oauth2/token',

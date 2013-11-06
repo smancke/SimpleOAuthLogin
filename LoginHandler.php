@@ -100,7 +100,7 @@ class LoginHandler {
         
         //create session         
         $sessionId = $userMgr->startSession();
-        setcookie('s', $sessionId, 0, '/');            
+        setcookie('s', $sessionId,  time()+60*60*24*7, '/');
         return true;
     }
 

@@ -197,6 +197,10 @@ class UserManager {
         return $this->db->fetchRows("SELECT * FROM project WHERE id IN (SELECT project_id FROM user_project WHERE user_id = ?)", [$this->userId]);
     }
 
+    public function getMyOrPublicProjects() {        
+        return $this->db->fetchRows("SELECT * FROM project WHERE is_public_viewable = '1' OR id IN (SELECT project_id FROM user_project WHERE user_id = ?)", [$this->userId]);
+    }
+
 
     public function getMyContactsRights($projectId) {
         $sql = <<<EOT

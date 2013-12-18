@@ -54,8 +54,6 @@ class UserManager {
                 throw new Exception('error on creating user: '. $this->db->error());
             }
         }
-
-
     }
 
     /**
@@ -214,6 +212,42 @@ class UserManager {
             ORDER BY is_owner DESC, can_write DESC, displayname ASC
 EOT;
         return $this->db->fetchRows($sql, [$projectId, $this->userId, $projectId, $this->userId]);
+    }
+
+    public function setUserProjectRights($projectId, $userId, $rights) {
+        if (! $rights['can_read'] ) {
+            $this->db->execute("DELETE FROM user_project WHERE user_id = ? AND project_id = ?", [$userId, $projectId]);
+
+
+        } else { // user can read
+
+            $currentRights = $this->db->fetchRow("SELECT * FROM user_project WHERE user_id = ? AND project_id = ?", [$userId, $projectId]);
+        
+
+            if (! $currentRights) {
+
+                // insert an rights entry
+                $insData = ['user_id' => $userId,
+                            'project_id' => $projectId,
+                            'can_write' => $rights['can_write'],
+                            'is_owner' => $rights['is_owner'],
+                            'created' => date('Y-m-d H:i:s',time())];
+                $id = $this->db->insert( $insData, 'user_project' );
+                
+            } else {
+
+                // test, if we have to perform an update
+                if (($currentRights['can_write'] xor $rights['can_write'])
+                    || ($currentRights['is_owner'] xor $rights['is_owner'])) {                
+                    $newRights = ['can_write' => $rights['can_write'],
+                                  'is_owner' => $rights['is_owner']];
+                    $this->db->update($newRights, 
+                                      'user_project', 
+                                      ['user_id' => $userId, 'project_id' => $projectId]);
+                }
+
+            }
+        }
     }
 
     public function setProjectRights($projectId, $rightsList) {        

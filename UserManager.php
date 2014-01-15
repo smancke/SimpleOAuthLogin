@@ -22,9 +22,9 @@ class UserManager {
      */
     public function setAndCreateUserIfNotExists($origin, $externalId, $email='', $displayName='', $imageUrl='') {
         
-        $result = $this->db->fetchRow("SELECT * FROM user WHERE origin = ? AND external_id = ?", [$origin, $externalId]);
+        $result = $this->db->fetchRow('SELECT * FROM "user" WHERE "origin" = ? AND "external_id" = ?', [$origin, $externalId]);
         if ($result) {
-            
+
             $this->userId = $result['id'];
             $updateFields = ['last_login' => date('Y-m-d H:i:s',time())];
             if ($email)
@@ -35,7 +35,7 @@ class UserManager {
                 $updateFields['image_url'] = $imageUrl;
 
             $this->db->update($updateFields, 
-                              'user', 
+                              '"user"', 
                               ['id' => $this->userId]);
 
 
@@ -48,7 +48,7 @@ class UserManager {
                         'origin' => $origin, 
                         'last_login' => date('Y-m-d H:i:s',time()),
                         'created' => date('Y-m-d H:i:s',time())];
-            $this->userId = $this->db->insert( $insData, 'user' );
+            $this->userId = $this->db->insert( $insData, '"user"' );
 
             if (!$this->userId) {
                 throw new Exception('error on creating user: '. $this->db->error());
@@ -60,7 +60,7 @@ class UserManager {
      * Returns the information of a user
      */
     public function getUserInfo() {
-        return $this->db->fetchRow("SELECT * FROM user WHERE id = ?", [$this->userId]);
+        return $this->db->fetchRow('SELECT * FROM "user" WHERE "id" = ?', [$this->userId]);
     }
 
     /**
@@ -165,14 +165,14 @@ class UserManager {
     }
 
     protected function updateMyContact($googlePersonItem) {
-        $id = $this->db->fetchCell("SELECT id FROM user WHERE origin = 'google' AND external_id = ?", [$googlePersonItem->id]);
+        $id = $this->db->fetchCell("SELECT \"id\" FROM \"user\" WHERE origin = 'google' AND external_id = ?", [$googlePersonItem->id]);
         if (!$id) {
             $insData = ['displayname' => $googlePersonItem->displayName,
                         'origin' => 'google',
                         'external_id' =>  $googlePersonItem->id,
                         'image_url' =>  $googlePersonItem->image->url,
                         'created' => date('Y-m-d H:i:s',time())];
-            $id = $this->db->insert( $insData, 'user' );
+            $id = $this->db->insert( $insData, '"user"' );
             if (!$id)
                 return false;
         }
@@ -196,13 +196,14 @@ class UserManager {
     }
 
     public function getMyOrPublicProjects() {        
-        return $this->db->fetchRows("SELECT * FROM project WHERE is_public_viewable = '1' OR id IN (SELECT project_id FROM user_project WHERE user_id = ?)", [$this->userId]);
+        $userid = ($this->userId) ? $this->userId : -1;
+        return $this->db->fetchRows("SELECT * FROM project WHERE is_public_viewable = '1' OR id IN (SELECT project_id FROM user_project WHERE user_id = ?)", [$userid]);
     }
 
 
     public function getMyContactsRights($projectId) {
         $sql = <<<EOT
-            SELECT * FROM user
+            SELECT * FROM "user"
             LEFT OUTER JOIN user_project ON user.id = user_project.user_id AND user_project.project_id = ?
             WHERE 
             user.id IN (SELECT friend_id FROM user_user WHERE self_id = ?)

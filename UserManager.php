@@ -11,7 +11,7 @@ class UserManager {
 
     private $sessionExpirationTime;
 
-    public function __construct($db, $sessionExpirationTime=1800) {
+    public function __construct($db, $sessionExpirationTime=600000) {// one week sessionb lifetime
         $this->db = $db;
         $this->sessionExpirationTime = $sessionExpirationTime;
     }

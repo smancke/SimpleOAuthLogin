@@ -43,7 +43,7 @@ class LoginHandler {
 
         setcookie('l', json_encode($loginInfo), 0, '/');
 
-        $authUrl = $this->loginProvider->getAuthUrl($loginInfo['state'], true);
+        $authUrl = $this->loginProvider->getAuthUrl($loginInfo['state'], false);
         Header('Location: '. $authUrl);
     }
 
